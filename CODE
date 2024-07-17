@@ -1,1 +1,188 @@
+# Function to calculate BMI and determine weight category
+def calculate_bmi(weight, height):
+    bmi = weight / ((height/100) ** 2)
+    if bmi < 18.5:
+        return "Underweight", bmi
+    elif 18.5 <= bmi < 24.9:
+        return "Normal weight", bmi
+    elif 25 <= bmi < 29.9:
+        return "Overweight", bmi
+    else:
+        return "Obese", bmi
+
+# Function to calculate caloric deficit for weight loss
+def calculate_caloric_deficit(weight, height, age, gender, activity_level):
+    if gender.upper() == "M":
+        bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age)
+    else:
+        bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age)
+
+    maintenance_calories = bmr * activity_level
+    target_calories = maintenance_calories - 500  # Aim for a 500 calorie deficit for weight loss
+    return target_calories, maintenance_calories
+
+# Function to calculate caloric surplus for weight gain
+def calculate_caloric_surplus(weight, height, age, gender, activity_level):
+    if gender.upper() == "M":
+        bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age)
+    else:
+        bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age)
+
+    maintenance_calories = bmr * activity_level
+    target_calories = maintenance_calories + 500  # Aim for a 500 calorie surplus for weight gain
+    return target_calories, maintenance_calories
+
+# Function to calculate goal calories based on desired weight range
+def calculate_goal_calories(weight, height, desired_weight_range):
+    lower_bound, upper_bound = desired_weight_range
+    mid_point = (lower_bound + upper_bound) / 2
+    goal_bmi = mid_point / ((height/100) ** 2)
+    goal_weight_loss = weight - mid_point
+    goal_calories = goal_weight_loss * 7700  # Assuming 1 kg of weight loss is approximately equal to 7700 calories
+    return goal_calories
+
+# Function to calculate maintenance calories
+def calculate_calories(age, gender, weight, height, activity_level):
+    if gender.upper() == "M":
+        bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age)
+    else:
+        bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age)
+
+    maintenance_calories = bmr * activity_level
+    return maintenance_calories
+
+# Function to calculate macronutrient distribution and time to achieve goal
+def calculate_nutrition(maintenance_calories):
+    carbs_ratio = 0.5
+    protein_ratio = 0.3
+    fats_ratio = 0.2
+
+    carbs_calories = maintenance_calories * carbs_ratio
+    protein_calories = maintenance_calories * protein_ratio
+    fats_calories = maintenance_calories * fats_ratio
+
+    carbs_grams = carbs_calories / 4  # 1 gram of carbs = 4 calories
+    protein_grams = protein_calories / 4  # 1 gram of protein = 4 calories
+    fats_grams = fats_calories / 9  # 1 gram of fat = 9 calories
+
+    # caloric_deficit_surplus = maintenance_calories - goal_calories
+    # calories_per_month = caloric_deficit_surplus * 30  # Assuming 30 days in a month
+    # months_required = abs(calories_per_month / 3500)  # 1 pound = 3500 calories
+
+    return carbs_grams, protein_grams, fats_grams
+
+# Main function to take user input and display results
+def main():
+    name = input("Enter your name ")
+    age = int(input("Enter your age: "))
+    gender = input("Enter your gender (M/F): ").upper()
+    weight = float(input("Enter your weight in kilograms: "))
+    height = 30.48*float(input("Enter your height in foot: "))
+    # print("Height: ", height)
+    ac_level = int(input("Enter your activity level ( 1 for sedentary, 2 for lightly active, 3 for moderately active, 4 for very active, 5 for extra active ) : "))
+    activity_level = 1.55
+
+    if ac_level ==1:
+        activity_level = 1.2
+    elif ac_level ==2:
+        activity_level = 1.375
+    elif ac_level ==3:
+        activity_level = 1.55
+    elif ac_level ==4:
+        activity_level = 1.725
+    elif ac_level ==5:
+        activity_level = 1.9
+
+    # activity_level = float(input("Enter your activity level (1.2 for sedentary, 1.375 for lightly active, 1.55 for moderately active, 1.725 for very active, 1.9 for extra active): "))
+    
+    # desired_weight_range = tuple(map(float, input("Enter your desired weight range (lower bound, upper bound) in kilograms, separated by space: ").split()))
+
+
+    weight_category, bmi = calculate_bmi(weight, height)
+    # print("Weight Category:", weight_category)
+    # print("BMI:", bmi)
+    months_required = 0
+    target_calories = 0
+
+    maintenance_calories=0
+
+    if weight_category == "Underweight":
+        target_calories, maintenance_calories = calculate_caloric_surplus(weight, height, age, gender, activity_level)
+        months_required = int(abs((weight - 18.5) * 7700 / (target_calories * 30)) ) # Assuming 1 kg of weight gain is approximately equal to 7700 calories
+        print("\nYou are underweight.")
+        target_calories = int(target_calories)
+        maintenance_calories = int(maintenance_calories)
+        print("Your Maintenance Calories : ", maintenance_calories)
+        inp = input("\nDo you want to Gain weight(Y/N)\n")
+        if inp.upper() == "Y":
+            print("\nTarget daily calories for weight gain:", target_calories)
+            print("Estimated Time to Achieve Normal Weight: {:.2f} months".format(months_required))
+            print("Gradually increase your caloric intake through nutritious foods to gain weight.")
+    elif weight_category == "Overweight":
+        target_calories, maintenance_calories = calculate_caloric_deficit(weight, height, age, gender, activity_level)
+        months_required = int( abs((weight - 24.9) * 7700 / (target_calories * 30)) )  # Assuming 1 kg of weight loss is approximately equal to 7700 calories
+        print("\nYou are overweight.")
+        target_calories= int(target_calories)
+        maintenance_calories = int(maintenance_calories)
+        print("Your Maintenance Calories : ", maintenance_calories)
+        inp = input("\nDo you want to Loss weight(Y/N)\n")
+        if inp.upper() == "Y":
+            print("\nTarget daily calories for weight loss:", target_calories)
+            print("Estimated Time to Achieve Normal Weight: {:.2f} months".format(months_required))
+            print("Gradually decrease your caloric intake to achieve a healthy weight.")
+    else:
+        print("You are in the normal weight category. Maintain a balanced diet and exercise regularly.")
+        maintenance_calories = int(calculate_calories(age, gender, weight, height, activity_level))
+    
+    inp = input("\n\nDo you want to Gentrate Report (Y/N)\n")
+
+    if inp.upper() == "Y":
+
+        if target_calories>0 : 
+            carbs_grams, protein_grams, fats_grams = calculate_nutrition(target_calories)
+        else: 
+            carbs_grams, protein_grams, fats_grams = calculate_nutrition(maintenance_calories)
+    
+    # maintenance_calories = calculate_calories(age, gender, weight, height, activity_level)
+    # goal_calories = calculate_goal_calories(weight, height, desired_weight_range)
+    # carbs_grams, protein_grams, fats_grams = calculate_nutrition(maintenance_calories)
+        print("\n----------------------------------------------------------------------------------------------------------------------------------------------------------------")
+        print("                                         Your report ")
+        print("----------------------------------------------------------------------------------------------------------------------------------------------------------------")
+
+        print("\n                               Name:",name.upper())
+        print("\n                               Age: {:.2f}        Gender: {:.2s}        Weight: {:.2f}".format(age,gender, weight))
+        print("\n                               Weight Category:", weight_category)
+        print("\n                               BMI:", bmi)
+
+        print("\n                               Maintenance Calories:", maintenance_calories)
+        if target_calories>0 : 
+            print("\n                               Target Calories:", target_calories)
+    # print("Goal Calories:", goal_calories)
+        print("\n                               Carbs: {:.2f} grams, Protein: {:.2f} grams, Fats: {:.2f} grams".format(carbs_grams, protein_grams, fats_grams))
+        if months_required>0 :
+            print("\n                               Estimated Time to Achieve Goal: {:.2f} months".format(months_required))
+
+
+        print("\n----------------------------------------------------------------------------------------------------------------------------------------------------------------")
+    else:
+        print("Bye Bye! have a Nice Day")
+
+    inp = input("\n\nDo you want to know Great sources of protien carbs and fats (Y/N)\n")
+
+    if inp.upper() == "Y":
+        print("\n\n Here are few recommendation you should add in your diet ")
+        # print("- Chicken is a great source of Protien and carbs if your primary goal is to gain some muscles too we recommend to add chicken in your diet")
+        print("\n   -Fruits and Vegetables: Rich in vitamins, minerals, and antioxidants. Examples include spinach, kale, broccoli, berries, oranges, and bananas.",
+            "\n   -Whole Grains: Provide fiber, B vitamins, and minerals. Choose options like brown rice, quinoa, oats, and whole wheat bread.",
+            "\n   -Lean Proteins: Important for building and repairing tissues. Include sources like chicken, turkey, fish, tofu, legumes, and low-fat dairy products.",
+            "\n   -Nuts and Seeds: Packed with healthy fats, protein, and various nutrients. Options include almonds, walnuts, chia seeds, and flaxseeds.",
+            "\n   -Dairy or Dairy Alternatives: Good sources of calcium and vitamin D. Choose low-fat or non-fat options like yogurt, milk, or fortified plant-based milks (such as almond or soy milk).",
+            "\n   -Healthy Fats: Incorporate sources of unsaturated fats like avocados, olive oil, and fatty fish (such as salmon and mackerel) to support heart health.")
+        # print(   "")
+    else:
+        print("Bye Bye! have a Nice Day")
+
+if __name__ == "__main__":
+    main()
 
